@@ -115,7 +115,9 @@ public class SortingMachine5a<T> extends SortingMachineSecondary<T> {
         assert 0 <= j : "Violation of: 0 <= j";
         assert j < array.length : "Violation of: j < |array|";
 
-        // TODO - fill in body
+        T temp = this.heap[i];
+        this.heap[i] = this.heap[j];
+        this.heap[j] = temp;
 
     }
 
@@ -156,22 +158,21 @@ public class SortingMachine5a<T> extends SortingMachineSecondary<T> {
      * [the other entries in array are the same as in #array]
      * </pre>
      */
-    private static <T> void siftDown(T[] array, int top, int last,
-            Comparator<T> order) {
+    private static <T> void siftDown(T[] array, int top, int last, Comparator<T> order) {
         assert array != null : "Violation of: array is not null";
         assert order != null : "Violation of: order is not null";
         assert 0 <= top : "Violation of: 0 <= top";
         assert last < array.length : "Violation of: last < |array|";
         for (int i = 0; i < array.length; i++) {
-            assert array[i] != null : ""
-                    + "Violation of: all entries in array are not null";
+            assert array[i] != null
+                    : "" + "Violation of: all entries in array are not null";
         }
-        assert isHeap(array, 2 * top + 1, last, order) : ""
-                + "Violation of: SUBTREE_IS_HEAP(array, 2 * top + 1, last,"
-                + " [relation computed by order.compare method])";
-        assert isHeap(array, 2 * top + 2, last, order) : ""
-                + "Violation of: SUBTREE_IS_HEAP(array, 2 * top + 2, last,"
-                + " [relation computed by order.compare method])";
+        assert isHeap(array, 2 * top + 1, last, order)
+                : "" + "Violation of: SUBTREE_IS_HEAP(array, 2 * top + 1, last,"
+                        + " [relation computed by order.compare method])";
+        assert isHeap(array, 2 * top + 2, last, order)
+                : "" + "Violation of: SUBTREE_IS_HEAP(array, 2 * top + 2, last,"
+                        + " [relation computed by order.compare method])";
         /*
          * Impractical to check last requires clause; no need to check the other
          * requires clause, because it must be true when using the array
@@ -180,6 +181,22 @@ public class SortingMachine5a<T> extends SortingMachineSecondary<T> {
 
         // TODO - fill in body
         // *** you must use the recursive algorithm discussed in class ***
+        int left = 2 * top + 1;
+        int right = 2 * top + 2;
+        int largest = top;
+
+        if (left <= last && order.compare(array[left], array[largest]) > 0) {
+            largest = left;
+        }
+
+        if (right <= last && order.compare(array[right], array[largest]) > 0) {
+            largest = right;
+        }
+
+        if (largest != top) {
+            exchangeEntries(array, top, largest);
+            siftDown(array, largest, last, order);
+        }
 
     }
 
@@ -214,8 +231,8 @@ public class SortingMachine5a<T> extends SortingMachineSecondary<T> {
         assert order != null : "Violation of: order is not null";
         assert 0 <= top : "Violation of: 0 <= top";
         for (int i = 0; i < array.length; i++) {
-            assert array[i] != null : ""
-                    + "Violation of: all entries in array are not null";
+            assert array[i] != null
+                    : "" + "Violation of: all entries in array are not null";
         }
         /*
          * Impractical to check last requires clause; no need to check the other
@@ -296,14 +313,13 @@ public class SortingMachine5a<T> extends SortingMachineSecondary<T> {
      *     [relation computed by order.compare method])
      * </pre>
      */
-    private static <T> boolean isHeap(T[] array, int top, int last,
-            Comparator<T> order) {
+    private static <T> boolean isHeap(T[] array, int top, int last, Comparator<T> order) {
         assert array != null : "Violation of: array is not null";
         assert 0 <= top : "Violation of: 0 <= top";
         assert last < array.length : "Violation of: last < |array|";
         for (int i = 0; i < array.length; i++) {
-            assert array[i] != null : ""
-                    + "Violation of: all entries in array are not null";
+            assert array[i] != null
+                    : "" + "Violation of: all entries in array are not null";
         }
         /*
          * No need to check the other requires clause, because it must be true
@@ -344,27 +360,25 @@ public class SortingMachine5a<T> extends SortingMachineSecondary<T> {
      */
     private boolean conventionHolds() {
         if (this.insertionMode) {
-            assert this.heapSize == 0 : ""
-                    + "Violation of: if $this.insertionMode then $this.heapSize = 0";
+            assert this.heapSize == 0
+                    : "" + "Violation of: if $this.insertionMode then $this.heapSize = 0";
         } else {
             assert this.entries.length() == 0 : ""
                     + "Violation of: if not $this.insertionMode then $this.entries = <>";
             assert 0 <= this.heapSize : ""
                     + "Violation of: if not $this.insertionMode then 0 <= $this.heapSize";
-            assert this.heapSize <= this.heap.length : ""
-                    + "Violation of: if not $this.insertionMode then"
-                    + " $this.heapSize <= |$this.heap|";
+            assert this.heapSize <= this.heap.length
+                    : "" + "Violation of: if not $this.insertionMode then"
+                            + " $this.heapSize <= |$this.heap|";
             for (int i = 0; i < this.heap.length; i++) {
-                assert this.heap[i] != null : ""
-                        + "Violation of: if not $this.insertionMode then"
-                        + " all entries in $this.heap are not null";
+                assert this.heap[i] != null
+                        : "" + "Violation of: if not $this.insertionMode then"
+                                + " all entries in $this.heap are not null";
             }
-            assert isHeap(this.heap, 0, this.heapSize - 1,
-                    this.machineOrder) : ""
-                            + "Violation of: if not $this.insertionMode then"
-                            + " SUBTREE_IS_HEAP($this.heap, 0, $this.heapSize - 1,"
-                            + " [relation computed by $this.machineOrder.compare"
-                            + " method])";
+            assert isHeap(this.heap, 0, this.heapSize - 1, this.machineOrder) : ""
+                    + "Violation of: if not $this.insertionMode then"
+                    + " SUBTREE_IS_HEAP($this.heap, 0, $this.heapSize - 1,"
+                    + " [relation computed by $this.machineOrder.compare" + " method])";
         }
         return true;
     }
@@ -429,8 +443,8 @@ public class SortingMachine5a<T> extends SortingMachineSecondary<T> {
     public final void transferFrom(SortingMachine<T> source) {
         assert source != null : "Violation of: source is not null";
         assert source != this : "Violation of: source is not this";
-        assert source instanceof SortingMachine5a<?> : ""
-                + "Violation of: source is of dynamic type SortingMachine5a<?>";
+        assert source instanceof SortingMachine5a<?>
+                : "" + "Violation of: source is of dynamic type SortingMachine5a<?>";
         /*
          * This cast cannot fail since the assert above would have stopped
          * execution in that case: source must be of dynamic type
@@ -473,8 +487,7 @@ public class SortingMachine5a<T> extends SortingMachineSecondary<T> {
 
     @Override
     public final T removeFirst() {
-        assert !this
-                .isInInsertionMode() : "Violation of: not this.insertion_mode";
+        assert !this.isInInsertionMode() : "Violation of: not this.insertion_mode";
         assert this.size() > 0 : "Violation of: this.contents /= {}";
 
         // TODO - fill in body
@@ -575,8 +588,7 @@ public class SortingMachine5a<T> extends SortingMachineSecondary<T> {
 
         @Override
         public void remove() {
-            throw new UnsupportedOperationException(
-                    "remove operation not supported");
+            throw new UnsupportedOperationException("remove operation not supported");
         }
 
     }
