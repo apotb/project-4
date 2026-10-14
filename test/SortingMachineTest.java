@@ -1,4 +1,7 @@
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Comparator;
 
@@ -10,7 +13,8 @@ import components.sortingmachine.SortingMachine;
  * JUnit test fixture for {@code SortingMachine<String>}'s constructor and
  * kernel methods.
  *
- * @author Put your name here
+ * @author Kaleb Agbobli
+ * @author Andrew Pavel
  *
  */
 public abstract class SortingMachineTest {
@@ -25,8 +29,7 @@ public abstract class SortingMachineTest {
      * @requires IS_TOTAL_PREORDER([relation computed by order.compare method])
      * @ensures constructorTest = (true, order, {})
      */
-    protected abstract SortingMachine<String> constructorTest(
-            Comparator<String> order);
+    protected abstract SortingMachine<String> constructorTest(Comparator<String> order);
 
     /**
      * Invokes the appropriate {@code SortingMachine} constructor for the
@@ -38,8 +41,7 @@ public abstract class SortingMachineTest {
      * @requires IS_TOTAL_PREORDER([relation computed by order.compare method])
      * @ensures constructorRef = (true, order, {})
      */
-    protected abstract SortingMachine<String> constructorRef(
-            Comparator<String> order);
+    protected abstract SortingMachine<String> constructorRef(Comparator<String> order);
 
     /**
      *
@@ -103,7 +105,7 @@ public abstract class SortingMachineTest {
      * Comparator<String> implementation to be used in all test cases. Compare
      * {@code String}s in lexicographic order.
      */
-    private static class StringLT implements Comparator<String> {
+    private static final class StringLT implements Comparator<String> {
 
         @Override
         public int compare(String s1, String s2) {
@@ -131,13 +133,118 @@ public abstract class SortingMachineTest {
     @Test
     public final void testAddEmpty() {
         SortingMachine<String> m = this.createFromArgsTest(ORDER, true);
-        SortingMachine<String> mExpected = this.createFromArgsRef(ORDER, true,
-                "green");
+        SortingMachine<String> mExpected = this.createFromArgsRef(ORDER, true, "green");
         m.add("green");
         assertEquals(mExpected, m);
     }
 
-    // TODO - add test cases for add, changeToExtractionMode, removeFirst,
-    // isInInsertionMode, order, and size
+    /*
+     * Added test cases.
+     */
+
+    @Test
+    public final void testAddSeveralEntries() {
+        SortingMachine<String> m = this.createFromArgsTest(ORDER, true);
+        SortingMachine<String> mExpected = this.createFromArgsRef(ORDER, true, "pear",
+                "apple", "orange", "banana");
+        m.add("pear");
+        m.add("apple");
+        m.add("orange");
+        m.add("banana");
+        assertEquals(mExpected, m);
+        assertEquals(4, m.size());
+        assertTrue(m.isInInsertionMode());
+    }
+
+    @Test
+    public final void testAddDuplicateEntries() {
+        SortingMachine<String> m = this.createFromArgsTest(ORDER, true, "apple", "apple",
+                "banana");
+        SortingMachine<String> mExpected = this.createFromArgsRef(ORDER, true, "apple",
+                "apple", "banana");
+        assertEquals(mExpected, m);
+        assertEquals(3, m.size());
+    }
+
+    @Test
+    public final void testChangeToExtractionModeEmpty() {
+        SortingMachine<String> m = this.createFromArgsTest(ORDER, true);
+        m.changeToExtractionMode();
+        assertFalse(m.isInInsertionMode());
+        assertEquals(0, m.size());
+    }
+
+    @Test
+    public final void testChangeToExtractionModeOneEntry() {
+        SortingMachine<String> m = this.createFromArgsTest(ORDER, true, "pear");
+        m.changeToExtractionMode();
+        assertFalse(m.isInInsertionMode());
+        assertEquals(1, m.size());
+        assertEquals("pear", m.removeFirst());
+        assertEquals(0, m.size());
+    }
+
+    @Test
+    public final void testChangeToExtractionModeMultipleEntries() {
+        SortingMachine<String> m = this.createFromArgsTest(ORDER, true, "pear", "apple",
+                "orange", "banana");
+        m.changeToExtractionMode();
+        assertFalse(m.isInInsertionMode());
+        assertEquals(4, m.size());
+        assertEquals("apple", m.removeFirst());
+        assertEquals("banana", m.removeFirst());
+        assertEquals("orange", m.removeFirst());
+        assertEquals("pear", m.removeFirst());
+        assertEquals(0, m.size());
+    }
+
+    @Test
+    public final void testRemoveFirstDuplicates() {
+        SortingMachine<String> m = this.createFromArgsTest(ORDER, false, "banana",
+                "apple", "banana", "apple", "apple");
+        assertEquals("apple", m.removeFirst());
+        assertEquals("apple", m.removeFirst());
+        assertEquals("apple", m.removeFirst());
+        assertEquals("banana", m.removeFirst());
+        assertEquals("banana", m.removeFirst());
+        assertEquals(0, m.size());
+    }
+
+    @Test
+    public final void testRemoveFirstReverseSortedEntries() {
+        SortingMachine<String> m = this.createFromArgsTest(ORDER, false, "e", "d", "c",
+                "b", "a");
+        assertEquals("a", m.removeFirst());
+        assertEquals("b", m.removeFirst());
+        assertEquals("c", m.removeFirst());
+        assertEquals("d", m.removeFirst());
+        assertEquals("e", m.removeFirst());
+        assertEquals(0, m.size());
+    }
+
+    @Test
+    public final void testOrder() {
+        SortingMachine<String> m = this.constructorTest(ORDER);
+        assertSame(ORDER, m.order());
+        m.add("zebra");
+        assertSame(ORDER, m.order());
+        m.changeToExtractionMode();
+        assertSame(ORDER, m.order());
+    }
+
+    @Test
+    public final void testSizeAsEntriesAreRemoved() {
+        SortingMachine<String> m = this.createFromArgsTest(ORDER, false, "delta", "alpha",
+                "charlie", "bravo");
+        assertEquals(4, m.size());
+        m.removeFirst();
+        assertEquals(3, m.size());
+        m.removeFirst();
+        assertEquals(2, m.size());
+        m.removeFirst();
+        assertEquals(1, m.size());
+        m.removeFirst();
+        assertEquals(0, m.size());
+    }
 
 }
