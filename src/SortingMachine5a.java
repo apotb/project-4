@@ -179,8 +179,6 @@ public class SortingMachine5a<T> extends SortingMachineSecondary<T> {
          * representation for a complete binary tree.
          */
 
-        // TODO - fill in body
-        // *** you must use the recursive algorithm discussed in class ***
         int left = 2 * top + 1;
         int right = 2 * top + 2;
         int smallest = top;
